@@ -22,9 +22,10 @@ name = "kittylitter"
 path = "src/main.rs"
 
 [dependencies]
-# Tracks dnakov/alleycat main. `./tools/scripts/update-alleycat-main.sh`
-# refreshes Cargo.lock to whatever `main` points at before build/release lanes.
-alleycat = { git = "https://github.com/dnakov/alleycat.git", branch = "main" }
+# Tracks the OMP-enabled Alleycat fork while the upstream integration is
+# reviewed. `./tools/scripts/update-alleycat-main.sh --kittylitter` refreshes
+# this branch's lockfile to its current commit.
+alleycat = { git = "https://github.com/johannhipp/alleycat.git", branch = "omp-support" }
 anyhow = "1"
 
 # cargo-dist builds with `cargo build --profile dist`. Mirrors the

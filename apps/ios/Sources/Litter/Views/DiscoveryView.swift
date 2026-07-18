@@ -306,6 +306,7 @@ struct DiscoveryView: View {
     private static let kittylitterAgents: [AgentRuntimeKind] = [
         "codex",
         "pi",
+        "omp",
         "amp",
         "opencode",
         "claude",

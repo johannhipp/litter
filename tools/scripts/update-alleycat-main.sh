@@ -22,6 +22,9 @@ if [ "${LITTER_SKIP_ALLEYCAT_UPDATE:-0}" = "1" ]; then
   exit 0
 fi
 
+KITTYLITTER_ALLEYCAT_REPO="${KITTYLITTER_ALLEYCAT_REPO:-johannhipp/alleycat}"
+KITTYLITTER_ALLEYCAT_REF="${KITTYLITTER_ALLEYCAT_REF:-omp-support}"
+
 if ! command -v cargo >/dev/null 2>&1; then
   echo "error: cargo is required" >&2
   exit 1
@@ -33,6 +36,16 @@ ALLEYCAT_MAIN_SHA="$(
 )"
 if [ -z "$ALLEYCAT_MAIN_SHA" ]; then
   echo "error: could not resolve dnakov/alleycat main" >&2
+  exit 1
+fi
+
+KITTYLITTER_ALLEYCAT_SHA="$(
+  git ls-remote "https://github.com/${KITTYLITTER_ALLEYCAT_REPO}.git" \
+    "refs/heads/${KITTYLITTER_ALLEYCAT_REF}" \
+    | awk '{ print $1; exit }'
+)"
+if [ -z "$KITTYLITTER_ALLEYCAT_SHA" ]; then
+  echo "error: could not resolve ${KITTYLITTER_ALLEYCAT_REPO} ${KITTYLITTER_ALLEYCAT_REF}" >&2
   exit 1
 fi
 
@@ -53,12 +66,12 @@ update_shared() {
 }
 
 update_kittylitter() {
-  echo "==> Resolving kittylitter Alleycat dep to dnakov/alleycat main ($ALLEYCAT_MAIN_SHA)..."
+  echo "==> Resolving kittylitter Alleycat dep to ${KITTYLITTER_ALLEYCAT_REPO} ${KITTYLITTER_ALLEYCAT_REF} ($KITTYLITTER_ALLEYCAT_SHA)..."
   cargo update \
     --quiet \
     --manifest-path "$REPO_DIR/services/kittylitter/Cargo.toml" \
     -p alleycat \
-    --precise "$ALLEYCAT_MAIN_SHA"
+    --precise "$KITTYLITTER_ALLEYCAT_SHA"
 }
 
 case "$MODE" in

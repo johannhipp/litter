@@ -929,6 +929,7 @@ fun DiscoveryScreen(
 private val KittylitterAgents: List<AgentRuntimeKind> = listOf(
     "codex",
     "pi",
+    "omp",
     "amp",
     "opencode",
     "claude",
