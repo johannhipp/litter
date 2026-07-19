@@ -237,8 +237,8 @@ Android session list showed the pre-existing thread
 second host restart. After reconnect, the screen still displayed its
 `OMP_E2E_OK` history and `/tmp/kitty-omp-rotated-home` header, while the host
 trace recorded `thread/resume` requests `id=22` and `id=23` with no ACP error.
-Capture: `/tmp/omp-cwd-fix-preexisting-postrestart.png`. The run used the
-local relay at `127.0.0.1:3340` and the isolated host home only.
+Capture: `artifacts/android-local-run/omp-cwd-fix-preexisting-postrestart.png`. The
+run used the local relay at `127.0.0.1:3340` and the isolated host home only.
 
 The required iOS validation could not run on this workstation. `xcodebuild`
 reported that the active developer directory is Command Line Tools, and
