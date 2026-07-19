@@ -231,11 +231,14 @@ and OMP rejected `session/load` because the session was already loaded for
   sessions.
 
 The new regression test passes against a fake OMP ACP agent that rejects
-cwd-mismatched `session/load` requests. After rebuilding and restarting the
-local host, the Android app reconnected to the existing OMP session without
-the prior ACP error. A new prompt then rendered `OMP_CWD_OK` in a session whose
-header showed `/tmp/kitty-omp-rotated-home`. The run used the local relay at
-`127.0.0.1:3340` and the isolated host home only.
+cwd-mismatched `session/load` requests. For live resume validation, the
+Android session list showed the pre-existing thread
+`019f781d-27a1-7000-8bbd-074908bfdba6`; that thread was selected before a
+second host restart. After reconnect, the screen still displayed its
+`OMP_E2E_OK` history and `/tmp/kitty-omp-rotated-home` header, while the host
+trace recorded `thread/resume` requests `id=22` and `id=23` with no ACP error.
+Capture: `/tmp/omp-cwd-fix-preexisting-postrestart.png`. The run used the
+local relay at `127.0.0.1:3340` and the isolated host home only.
 
 The required iOS validation could not run on this workstation. `xcodebuild`
 reported that the active developer directory is Command Line Tools, and
