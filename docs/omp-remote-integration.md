@@ -122,8 +122,8 @@ emits no archive notification.
 Snapshot: 2026-07-19.
 
 The GitHub Litter fork's `main` carries the published OMP wiring and
-validation record. Its KittyLitter lockfile pins `johannhipp/alleycat`
-`f06cfe7201948e4a812585f54af9bb8b5b242a15`. It is not the upstream PR base.
+validation record. Its KittyLitter lockfile now pins `johannhipp/alleycat`
+`87003e2eefffbf246e1325968cc7d2776a100081`. It is not the upstream PR base.
 The actual upstream `dnakov/litter` files retain the `dnakov/alleycat` `main`
 dependency, updater, and wrapper README; use that baseline when preparing the
 two Litter PRs.
@@ -180,7 +180,8 @@ Host and protocol checks passed:
 - `cargo check -p alleycat-acp-bridge` passed.
 - `cargo test -p alleycat-acp-bridge command_exec_tests` passed.
 - `cargo test -p alleycat-acp-bridge --test omp_session_lifecycle` passed
-  (5 tests), including the failed-turn cleanup regression.
+  (6 tests), including failed-turn cleanup and authoritative OMP session-cwd
+  resume coverage.
 - `BRIDGE_CONFORMANCE_SKIP_UPSTREAM_SCHEMA=1 cargo test --workspace
   --exclude alleycat-opencode-bridge` passed (569 tests).
 - `cargo check --locked` passed in `services/kittylitter` against the
@@ -215,6 +216,26 @@ Android validation passed on the `litter-api35` Android 15 arm64 emulator
   UI error is in `artifacts/android-local-run/omp-prompt-result-rebuilt.png`;
   the host log reports: `No model selected. Use /login, set an API key
   environment variable, or create .../.omp/agent/agent.db`.
+
+### CWD resume regression follow-up
+
+The first live Android run exposed an OMP-specific resume invariant: the
+client sent `cwd: "/"` after `thread/list` had discarded the ACP session cwd,
+and OMP rejected `session/load` because the session was already loaded for
+`/tmp/kitty-omp-rotated-home`. The bridge now:
+
+- Preserves ACP `cwd` in `thread/list`.
+- Resolves the authoritative persisted cwd before `session/load`, so mobile
+  fallback values cannot select the wrong directory.
+- Retains a valid requested absolute cwd when an ACP agent cannot list
+  sessions.
+
+The new regression test passes against a fake OMP ACP agent that rejects
+cwd-mismatched `session/load` requests. After rebuilding and restarting the
+local host, the Android app reconnected to the existing OMP session without
+the prior ACP error. A new prompt then rendered `OMP_CWD_OK` in a session whose
+header showed `/tmp/kitty-omp-rotated-home`. The run used the local relay at
+`127.0.0.1:3340` and the isolated host home only.
 
 The required iOS validation could not run on this workstation. `xcodebuild`
 reported that the active developer directory is Command Line Tools, and
