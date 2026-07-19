@@ -119,17 +119,16 @@ emits no archive notification.
 
 ## Current PR readiness
 
-Snapshot: 2026-07-18.
+Snapshot: 2026-07-19.
 
-The local Litter fork's `main` is at `ae4079c`, a combined experiment whose
-KittyLitter lockfile pins `johannhipp/alleycat` `omp-support` at
-`86e668e2a298b1864d06076b1f1f551901d8a34a`. It is not the upstream PR base.
+The GitHub Litter fork's `main` is at `bb0c711`, and its KittyLitter
+lockfile pins `johannhipp/alleycat` `omp-support` at
+`f06cfe7201948e4a812585f54af9bb8b5b242a15`. It is not the upstream PR base.
 The actual upstream `dnakov/litter` files retain the `dnakov/alleycat` `main`
 dependency, updater, and wrapper README; use that baseline when preparing the
 two Litter PRs.
-The session-delete implementation and its tests are currently uncommitted
-Alleycat worktree changes, so the upstream `main` pin does not contain the
-final archive behavior.
+The OMP bridge, session-delete implementation, and their tests are committed
+on the personal Alleycat fork, but are not merged upstream.
 
 Explicit blockers before upstream PRs:
 
