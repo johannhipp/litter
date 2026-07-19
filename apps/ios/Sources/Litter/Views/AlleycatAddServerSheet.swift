@@ -694,8 +694,10 @@ private final class QRScannerViewController: UIViewController, AVCaptureMetadata
 
     private let captureSession = AVCaptureSession()
     private var previewLayer: AVCaptureVideoPreviewLayer?
-    private let metadataQueue = DispatchQueue(label: "com.alleycat.qrscanner")
+    private let sessionQueue = DispatchQueue(label: "com.alleycat.qrscanner")
     private var didReportScan = false
+    private var configurationFailed = false
+    private var didReportConfigurationFailure = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -705,16 +707,27 @@ private final class QRScannerViewController: UIViewController, AVCaptureMetadata
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        guard !captureSession.isRunning else { return }
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            self?.captureSession.startRunning()
+        guard !configurationFailed else { return }
+        sessionQueue.async { [weak self] in
+            guard let self, !self.captureSession.isRunning else { return }
+            self.captureSession.startRunning()
+        }
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        guard configurationFailed, !didReportConfigurationFailure else { return }
+        didReportConfigurationFailure = true
+        DispatchQueue.main.async { [weak self] in
+            self?.onPermissionDenied?()
         }
     }
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        if captureSession.isRunning {
-            captureSession.stopRunning()
+        sessionQueue.async { [weak self] in
+            guard let self, self.captureSession.isRunning else { return }
+            self.captureSession.stopRunning()
         }
     }
 
@@ -725,29 +738,29 @@ private final class QRScannerViewController: UIViewController, AVCaptureMetadata
 
     private func configureSession() {
         guard let device = AVCaptureDevice.default(for: .video) else {
-            onPermissionDenied?()
+            configurationFailed = true
             return
         }
         guard let input = try? AVCaptureDeviceInput(device: device) else {
-            onPermissionDenied?()
+            configurationFailed = true
             return
         }
         if captureSession.canAddInput(input) {
             captureSession.addInput(input)
         } else {
-            onPermissionDenied?()
+            configurationFailed = true
             return
         }
 
         let output = AVCaptureMetadataOutput()
         if captureSession.canAddOutput(output) {
             captureSession.addOutput(output)
-            output.setMetadataObjectsDelegate(self, queue: metadataQueue)
+            output.setMetadataObjectsDelegate(self, queue: sessionQueue)
             if output.availableMetadataObjectTypes.contains(.qr) {
                 output.metadataObjectTypes = [.qr]
             }
         } else {
-            onPermissionDenied?()
+            configurationFailed = true
             return
         }
 
@@ -769,8 +782,8 @@ private final class QRScannerViewController: UIViewController, AVCaptureMetadata
             .stringValue
         else { return }
         didReportScan = true
+        captureSession.stopRunning()
         DispatchQueue.main.async { [weak self] in
-            self?.captureSession.stopRunning()
             self?.onScan?(payload)
         }
     }
