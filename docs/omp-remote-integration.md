@@ -240,8 +240,34 @@ trace recorded `thread/resume` requests `id=22` and `id=23` with no ACP error.
 Capture: `artifacts/android-local-run/omp-cwd-fix-preexisting-postrestart.png`. The
 run used the local relay at `127.0.0.1:3340` and the isolated host home only.
 
-The required iOS validation could not run on this workstation. `xcodebuild`
-reported that the active developer directory is Command Line Tools, and
-`xcrun simctl` was unavailable. No iOS app artifact or `Works with` capture
-was fabricated; the iOS screenshot checklist remains blocked on a full Xcode
-installation.
+## iOS validation follow-up
+
+The Xcode prerequisite is now available at `/Applications/Xcode-26.6.0.app`.
+The local OMP pairing flow was exercised on the booted simulator
+`Litter OMP Validation` (`FFE41F36-A9D6-4CEB-949F-39AFF2562E91`) against the
+matching local Alleycat daemon and `/tmp/omp-pair.json` payload.
+
+The focused UI test passed:
+
+```bash
+xcodebuild test \
+  -project Litter.xcodeproj \
+  -scheme Litter \
+  -destination 'platform=iOS Simulator,id=FFE41F36-A9D6-4CEB-949F-39AFF2562E91' \
+  -only-testing:LitterUITests/LitterUITests/testOmpPairingFlow \
+  CODE_SIGNING_ALLOWED=NO
+```
+
+Observed path: the app opened the kittylitter chooser, fell through the
+simulator's camera-unavailable QR path to paste JSON, loaded the advertised
+`Oh My Pi` agent, selected it, connected, and returned to the home dashboard.
+The final accessibility hierarchy showed the paired server as
+`Mac.fritz.box, Codex, Oh My Pi`.
+
+Chooser capture:
+
+- `/tmp/ios-omp-works-with-chooser.png`
+
+The broader `testCaptureScreenshots` helper remains environment-dependent: its
+hard-coded `.203` discovery-server selection was unavailable during this run,
+so that failure is not counted as an OMP pairing failure.

@@ -93,9 +93,6 @@ struct AlleycatAddServerSheet: View {
                 },
                 onCancel: {
                     showScanner = false
-                    if startScanningOnAppear, parsedParams == nil {
-                        dismiss()
-                    }
                 },
                 onPermissionDenied: {
                     showScanner = false
