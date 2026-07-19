@@ -271,3 +271,39 @@ Chooser capture:
 The broader `testCaptureScreenshots` helper remains environment-dependent: its
 hard-coded `.203` discovery-server selection was unavailable during this run,
 so that failure is not counted as an OMP pairing failure.
+
+## Post-review correction
+
+Date: 2026-07-19
+
+The first full iOS test run exposed one OMP-coupled assertion failure in
+`AppSnapshotRuntimeTests.testDisplayModelLabelFallsBackToProviderRuntimeLabel`.
+The implementation's fallback is metadata-driven: it uses the advertised
+`display_name`, then falls back to a title-cased runtime id when metadata is
+not yet available. Therefore the no-metadata `opencode` fixture correctly
+renders `Opencode`, not the legacy provider label `opencode`.
+
+The test was renamed to
+`testDisplayModelLabelFallsBackToProviderOrRuntimeLabel` and its expectation
+was updated to `Opencode`. The corrected test passed in the subsequent
+`LitterTests` run.
+
+The complete `LitterTests` target was rerun:
+
+```text
+Executed 205 tests, with 9 failures
+```
+
+The remaining failures are in HomeDashboard refresh/deduplication,
+PerformanceHelpers transcript collapsing, and SavedAppsStore disk-promotion
+coverage. None is the runtime-label assertion or the OMP pairing flow.
+
+The OMP pairing UI test was rerun after the correction and passed:
+
+```text
+LitterUITests.testOmpPairingFlow
+TEST SUCCEEDED
+```
+
+The label repair was pushed to the fork in commit
+[`c323009`](https://github.com/johannhipp/litter/commit/c323009).
