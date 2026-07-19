@@ -183,6 +183,8 @@ Host and protocol checks passed:
   (5 tests), including the failed-turn cleanup regression.
 - `BRIDGE_CONFORMANCE_SKIP_UPSTREAM_SCHEMA=1 cargo test --workspace
   --exclude alleycat-opencode-bridge` passed (569 tests).
+- `cargo check --locked` passed in `services/kittylitter` against the
+  published `johannhipp/alleycat` `omp-support` commit.
 
 The ACP bridge now implements buffered Codex `command/exec` through its
 configured `ProcessLauncher`. It preserves exit code/stdout/stderr, applies
