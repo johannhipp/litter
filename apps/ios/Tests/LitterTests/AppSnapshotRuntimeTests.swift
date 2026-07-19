@@ -122,7 +122,7 @@ final class AppSnapshotRuntimeTests: XCTestCase {
         XCTAssertEqual(thread.displayModelLabel, "gpt-5.4")
     }
 
-    func testDisplayModelLabelFallsBackToProviderRuntimeLabel() {
+    func testDisplayModelLabelFallsBackToProviderOrRuntimeLabel() {
         let claude = makeThreadSnapshot(
             key: ThreadKey(serverId: "srv", threadId: "thread-claude"),
             modelProvider: "anthropic",
@@ -136,7 +136,7 @@ final class AppSnapshotRuntimeTests: XCTestCase {
 
         XCTAssertEqual(claude.resolvedModel, "")
         XCTAssertEqual(claude.displayModelLabel, "Claude")
-        XCTAssertEqual(opencode.displayModelLabel, "opencode")
+        XCTAssertEqual(opencode.displayModelLabel, "Opencode")
     }
 
     func testApplyLocalThreadTitleUpdatesThreadAndSessionSummary() {
