@@ -121,8 +121,8 @@ emits no archive notification.
 
 Snapshot: 2026-07-19.
 
-The GitHub Litter fork's `main` is at `bb0c711`, and its KittyLitter
-lockfile pins `johannhipp/alleycat` `omp-support` at
+The GitHub Litter fork's `main` carries the published OMP wiring and
+validation record. Its KittyLitter lockfile pins `johannhipp/alleycat`
 `f06cfe7201948e4a812585f54af9bb8b5b242a15`. It is not the upstream PR base.
 The actual upstream `dnakov/litter` files retain the `dnakov/alleycat` `main`
 dependency, updater, and wrapper README; use that baseline when preparing the
