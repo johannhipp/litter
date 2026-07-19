@@ -144,8 +144,24 @@ final class LitterUITests: XCTestCase {
         pairTitle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
 
 
+        let cameraCancel = app.alerts["Camera Access Needed"].buttons["Cancel"]
+        if cameraCancel.waitForExistence(timeout: 5) {
+            cameraCancel.tap()
+        } else {
+            let scannerCancel = app.buttons["alleycat.scanner.cancelButton"]
+            if scannerCancel.waitForExistence(timeout: 5) {
+                scannerCancel.tap()
+            }
+        }
         let pasteDisclosure = app.buttons["Paste Pairing JSON"]
         XCTAssertTrue(pasteDisclosure.waitForExistence(timeout: 10), "Paste pairing controls did not appear")
+        let pasteHittable = NSPredicate(format: "exists == true AND hittable == true")
+        let pasteExpectation = XCTNSPredicateExpectation(predicate: pasteHittable, object: pasteDisclosure)
+        XCTAssertEqual(
+            XCTWaiter().wait(for: [pasteExpectation], timeout: 10),
+            .completed,
+            "Paste pairing controls did not become hittable after QR scanner dismissal"
+        )
         pasteDisclosure.tap()
 
         let editor = app.textViews.firstMatch
