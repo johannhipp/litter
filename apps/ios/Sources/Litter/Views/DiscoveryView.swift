@@ -396,6 +396,7 @@ struct DiscoveryView: View {
                     )
             )
         }
+        .contentShape(Rectangle())
         .buttonStyle(.plain)
         .accessibilityIdentifier(accessibilityID)
     }

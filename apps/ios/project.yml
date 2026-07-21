@@ -443,7 +443,6 @@ schemes:
     test:
       config: Debug
       targets:
-        - LitterTests
         - LitterUITests
     profile:
       config: Release

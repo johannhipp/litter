@@ -81,7 +81,7 @@ final class LitterUITests: XCTestCase {
         snapshot("01_Home")
 
         // 02 - Settings
-        let settingsButton = app.buttons["header.settingsButton"]
+        let settingsButton = app.buttons["gearshape"]
         if settingsButton.waitForExistence(timeout: 5) {
             settingsButton.tap()
             sleep(1)
@@ -103,6 +103,100 @@ final class LitterUITests: XCTestCase {
             app.swipeDown()
             sleep(1)
         }
+    }
+
+    @MainActor
+    func testDismissNotificationPromptForManualValidation() throws {
+        let app = XCUIApplication()
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        app.launch()
+
+        let allow = springboard.alerts.buttons["Allow"]
+        if allow.waitForExistence(timeout: 8) {
+            allow.tap()
+        }
+
+        XCTAssertTrue(
+            app.buttons["gearshape"].waitForExistence(timeout: 15),
+            "Normal home screen did not load after dismissing notification prompt"
+        )
+    }
+
+    @MainActor
+    func testOmpPairingFlow() throws {
+        let pairPath = "/tmp/omp-pair.json"
+        guard FileManager.default.fileExists(atPath: pairPath) else {
+            throw XCTSkip("OMP pairing fixture is only available in local validation environments")
+        }
+        let pairJSON = try String(contentsOfFile: pairPath, encoding: .utf8)
+        let app = XCUIApplication()
+        app.launch()
+        sleep(5)
+
+        let serverButton = app.buttons["server"]
+        XCTAssertTrue(serverButton.waitForExistence(timeout: 20), "Home server button did not appear")
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.85, dy: 0.16)).tap()
+
+        let pairButton = app.buttons["discovery.chooser.kittylitter"]
+        XCTAssertTrue(pairButton.waitForExistence(timeout: 10), "Pairing chooser did not appear")
+        let pairTitle = app.staticTexts["Pair with kittylitter"]
+        XCTAssertTrue(pairTitle.waitForExistence(timeout: 5), "Pairing card title did not appear")
+        pairTitle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+
+
+        let pasteDisclosure = app.buttons["Paste Pairing JSON"]
+        XCTAssertTrue(pasteDisclosure.waitForExistence(timeout: 10), "Paste pairing controls did not appear")
+        pasteDisclosure.tap()
+
+        let editor = app.textViews.firstMatch
+        XCTAssertTrue(editor.waitForExistence(timeout: 10), "Pairing JSON editor did not appear")
+        editor.tap()
+        editor.typeText(pairJSON)
+        app.buttons["Parse JSON"].tap()
+        if app.keyboards.firstMatch.exists {
+            app.navigationBars["Add Remote Host"].tap()
+        }
+
+        let agentSelectionButton = app.buttons.matching(
+            NSPredicate(format: "label == 'All' OR label == 'None'")
+        ).firstMatch
+        XCTAssertTrue(agentSelectionButton.waitForExistence(timeout: 20), "Agent list did not load")
+        if agentSelectionButton.label == "All" {
+            agentSelectionButton.tap()
+            let clearSelectionButton = app.buttons["None"]
+            XCTAssertTrue(clearSelectionButton.waitForExistence(timeout: 5), "Unable to expose clear-selection control")
+            clearSelectionButton.tap()
+        } else {
+            XCTAssertEqual(agentSelectionButton.label, "None", "Unexpected agent selection control state")
+            agentSelectionButton.tap()
+        }
+
+        let ompButton = app.buttons.matching(
+            NSPredicate(format: "label CONTAINS[c] %@", "Oh My Pi")
+        ).firstMatch
+        for _ in 0..<5 where !ompButton.exists {
+            app.swipeUp()
+            sleep(1)
+        }
+
+        XCTAssertTrue(ompButton.exists, "OMP agent was not advertised")
+        ompButton.tap()
+
+        for _ in 0..<3 where !app.buttons["Connect"].exists {
+            app.swipeUp()
+            sleep(1)
+        }
+        let connectButton = app.buttons["Connect"]
+        XCTAssertTrue(connectButton.waitForExistence(timeout: 10), "Connect button did not appear")
+        XCTAssertTrue(connectButton.isEnabled, "OMP agent was not selectable")
+        connectButton.tap()
+        let pairedServer = app.buttons.matching(
+            NSPredicate(format: "label CONTAINS[c] %@", "Oh My Pi")
+        ).firstMatch
+        XCTAssertTrue(
+            pairedServer.waitForExistence(timeout: 30),
+            "Paired server accessibility label did not expose Oh My Pi"
+        )
     }
 
     @MainActor
